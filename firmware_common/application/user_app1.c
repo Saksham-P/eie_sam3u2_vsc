@@ -54,7 +54,6 @@ extern volatile u32 G_u32SystemTime1s;                    /*!< @brief From main.
 extern volatile u32 G_u32SystemFlags;                     /*!< @brief From main.c */
 extern volatile u32 G_u32ApplicationFlags;                /*!< @brief From main.c */
 
-
 /***********************************************************************************************************************
 Global variable definitions with scope limited to this local application.
 Variable names shall start with "UserApp1_<type>" and be declared as static.
@@ -92,6 +91,9 @@ Promises:
 */
 void UserApp1Initialize(void)
 {
+
+  LedOn(BLUE0);
+
   /* If good initialization, set state to Idle */
   if( 1 )
   {
@@ -140,6 +142,86 @@ State Machine Function Definitions
 /* What does this state do? */
 static void UserApp1SM_Idle(void)
 {
+  static u16 blueLEDs[] = {BLUE0, BLUE1, BLUE2, BLUE3};
+  static u16 furElise[] = {
+    E4, D4S, E4, D4S, E4, B3, D4, C4, A3, C4, E4, A3, B3, E4, G4S, B3, C4, E4, 
+    E4, D4S, E4, D4S, E4, B3, D4, C4, A3, C4, E4, A3, B3, E4, C4, B3, A3, B3, 
+    C4, D4, E4, G4, F4, E4, D4, F4, E4, D4, C4, E4, D4, C4, B3, E4, D4S, E4, 
+    D4S, E4, B3, D4, C4, A3, C4, E4, A3, B3, E4, G4S, B3, C4, E4, E4, D4S, 
+    E4, D4S, E4, B3, D4, C4, A3, C4, E4, A3, B3, E4, C4, B3, A3
+  };
+  static u16 maryHadALittleLamb[] = {
+    E4, D4, C4, D4, E4, E4, E4, 
+    D4, D4, D4, E4, G4, G4, 
+    E4, D4, C4, D4, E4, E4, E4, 
+    E4, D4, D4, E4, D4, C4
+  };
+  static u16 twinkleTwinkle[] = {
+    C4, C4, G4, G4, A4, A4, G4, 
+    F4, F4, E4, E4, D4, D4, C4, 
+    G4, G4, F4, F4, E4, E4, D4, 
+    G4, G4, F4, F4, E4, E4, D4, 
+    C4, C4, G4, G4, A4, A4, G4, 
+    F4, F4, E4, E4, D4, D4, C4
+  };
+  static u16 happyBirthday[] = {
+    C4, C4, D4, C4, F4, E4, 
+    C4, C4, D4, C4, G4, F4, 
+    C4, C4, C5, A4, F4, E4, D4, 
+    B4, B4, A4, F4, G4, F4
+  };
+
+  static u16* songs[] = {furElise, maryHadALittleLamb, twinkleTwinkle, happyBirthday};
+  static u16 ledIndex = 0;
+  static u16* currentSong;
+  static bool songPlaying = FALSE;
+  static u16 songIndex = 0;
+  static u16 waitTime = 0;
+
+  if (WasButtonPressed(BUTTON1)) {
+    ButtonAcknowledge(BUTTON1);
+    ledIndex++;
+
+    if (ledIndex == (u8)(sizeof(blueLEDs) / sizeof(u16))) {
+      ledIndex = 0;
+    }
+
+    for (u8 i = 0; i < 4; i++) {
+      if (i == ledIndex) {
+        LedOn(blueLEDs[i]);
+      } else {
+        LedOff(blueLEDs[i]);
+      }
+    }
+  }
+
+  if (WasButtonPressed(BUTTON0)) {
+    songPlaying = TRUE;
+
+    if (songPlaying) {
+      if (waitTime == 0) {
+        waitTime = 200;
+        PWMAudioSetFrequency(BUZZER1, songs[ledIndex][songIndex]);
+        PWMAudioOn(BUZZER1);
+
+        if (songIndex == (u8)(sizeof(songs[ledIndex]) / sizeof(u16))) {
+          songIndex = 0;
+          songPlaying = FALSE;
+          ButtonAcknowledge(BUTTON0);
+        } else {
+          songIndex++;
+        }
+      } else {
+        waitTime--;
+      }
+    }
+  }
+
+  // if (IsButtonPressed(BUTTON0)) {
+  //   PWMAudioOn(BUZZER1);
+  // } else {
+  //   PWMAudioOff(BUZZER1);
+  // }
      
 } /* end UserApp1SM_Idle() */
      
