@@ -92,6 +92,11 @@ Promises:
 */
 void UserApp1Initialize(void)
 {
+  /* Turning of all LEDs and backlight to start*/
+  for (u8 i = 0; i < U8_TOTAL_LEDS; i++) {
+    LedOff((LedNameType)i);
+  }
+
   /* If good initialization, set state to Idle */
   if( 1 )
   {
@@ -140,6 +145,128 @@ State Machine Function Definitions
 /* What does this state do? */
 static void UserApp1SM_Idle(void)
 {
+
+  // static bool redLedBlinking = FALSE;
+  // LedRateType redBlinkinRates[] = {LED_1HZ, LED_2HZ, LED_4HZ, LED_8HZ};
+  // static u8 currentBlinkingIndex = 0;
+
+  // if (WasButtonPressed(BUTTON1)) {
+  //   ButtonAcknowledge(BUTTON1);
+
+  //   if (!redLedBlinking) {
+  //     redLedBlinking = TRUE;
+  //     LedBlink(RED1, redBlinkinRates[currentBlinkingIndex]);
+      
+  //   } else {
+
+  //     LedOff(RED1);
+  //     redLedBlinking = FALSE;
+  //   }
+  // }
+
+  // if (redLedBlinking && WasButtonPressed(BUTTON0)) {
+
+  //   ButtonAcknowledge(BUTTON0);
+    
+  //   currentBlinkingIndex++;
+  //   if (currentBlinkingIndex == (sizeof(redBlinkinRates) / sizeof(LedRateType))) {
+  //     currentBlinkingIndex = 0;
+  //   }
+  //   LedBlink(RED1, redBlinkinRates[currentBlinkingIndex]);
+  // }
+
+  ButtonNameType password[] = {BUTTON0, BUTTON1, BUTTON1, BUTTON0};
+  static bool systemLocked = TRUE;
+  static u8 currentPasswordProgress = 0;
+  static bool wrongPasswordStatus = FALSE;
+  static bool rightPasswordStatus = FALSE;
+  static u16 threeSecondCounter = 3000;
+
+  if (systemLocked && !wrongPasswordStatus && !rightPasswordStatus) {
+    LedOn(RED3);
+    LedOn(GREEN3);
+  } else {
+    LedOff(RED3);
+    LedOff(GREEN3);
+  }
+
+  if (IsButtonPressed(BUTTON0)) {
+    LedOn(BLUE0);
+  } else {
+    LedOff(BLUE0);
+  }
+
+  if (IsButtonPressed(BUTTON1)) {
+    LedOn(BLUE1);
+  } else {
+    LedOff(BLUE1);
+  }
+
+  if (WasButtonPressed(BUTTON0)) {
+    ButtonAcknowledge(BUTTON0);
+    if (BUTTON0 == password[currentPasswordProgress]) {
+      currentPasswordProgress++;
+    } else {
+      currentPasswordProgress = 0;
+    }
+
+    if (currentPasswordProgress > 4) {
+      currentPasswordProgress = 0;
+    }
+
+  } else if (WasButtonPressed(BUTTON1)) {
+    ButtonAcknowledge(BUTTON1);
+    if (BUTTON1 == password[currentPasswordProgress]) {
+      currentPasswordProgress++;
+    } else {
+      currentPasswordProgress = 0;
+    }
+
+    if (currentPasswordProgress > 4) {
+      currentPasswordProgress = 0;
+    }
+  }
+
+  if (IsButtonHeld(BUTTON0, 2000) && IsButtonHeld(BUTTON1, 2000)) {
+    if (currentPasswordProgress == (sizeof(password) / sizeof(ButtonNameType))) {
+      rightPasswordStatus = TRUE;
+    } else {
+      wrongPasswordStatus = TRUE;
+    }
+  }
+
+  if (wrongPasswordStatus) {
+    if (threeSecondCounter  == 3000) {
+      LedOff(BLUE3);
+      LedOff(GREEN3);
+      LedBlink(RED3, LED_8HZ);
+    }
+    threeSecondCounter--;
+    if (threeSecondCounter == 0) {
+      threeSecondCounter = 3000;
+      LedOn(RED3);
+      LedOn(GREEN3);
+      LedOff(BLUE3);
+      wrongPasswordStatus = FALSE;
+    }
+  }
+
+    if (rightPasswordStatus) {
+    if (threeSecondCounter  == 3000) {
+      LedOff(BLUE3);
+      LedOff(RED3);
+      LedBlink(GREEN3, LED_2HZ);
+    }
+
+    threeSecondCounter--;
+    if (threeSecondCounter == 0) {
+      threeSecondCounter = 3000;
+      LedOff(RED3);
+      LedOn(GREEN3);
+      LedOff(BLUE3);
+      rightPasswordStatus = FALSE;
+    }
+  }
      
 } /* end UserApp1SM_Idle() */
      
