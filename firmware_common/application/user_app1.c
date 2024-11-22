@@ -173,7 +173,6 @@ static void UserApp1SM_Idle(void)
 
   static u16* songs[] = {furElise, maryHadALittleLamb, twinkleTwinkle, happyBirthday};
   static u16 ledIndex = 0;
-  static u16* currentSong;
   static bool songPlaying = FALSE;
   static u16 songIndex = 0;
   static u16 waitTime = 0;
@@ -204,13 +203,52 @@ static void UserApp1SM_Idle(void)
         PWMAudioSetFrequency(BUZZER1, songs[ledIndex][songIndex]);
         PWMAudioOn(BUZZER1);
 
-        if (songIndex == (u8)(sizeof(songs[ledIndex]) / sizeof(u16))) {
-          songIndex = 0;
-          songPlaying = FALSE;
-          ButtonAcknowledge(BUTTON0);
-        } else {
-          songIndex++;
+        if (ledIndex == 0) {
+          if (songIndex == (u8)(sizeof(furElise) / sizeof(u16))) {
+            songPlaying = 0;
+            songPlaying = FALSE;
+            PWMAudioOff(BUZZER1);
+            ButtonAcknowledge(BUTTON0);
+          } else {
+            songIndex++;
+          }
+        } else if (ledIndex == 1) {
+          if (songIndex == (u8)(sizeof(maryHadALittleLamb) / sizeof(u16))) {
+            songPlaying = 0;
+            songPlaying = FALSE;
+            PWMAudioOff(BUZZER1);
+            ButtonAcknowledge(BUTTON0);
+          } else {
+            songIndex++;
+          }
+        } else if (ledIndex == 2) {
+          if (songIndex == (u8)(sizeof(twinkleTwinkle) / sizeof(u16))) {
+            songPlaying = 0;
+            songPlaying = FALSE;
+            PWMAudioOff(BUZZER1);
+            ButtonAcknowledge(BUTTON0);
+          } else {
+            songIndex++;
+          }
+        } else if (ledIndex == 3) {
+          if (songIndex == (u8)(sizeof(happyBirthday) / sizeof(u16))) {
+            songPlaying = 0;
+            songPlaying = FALSE;
+            PWMAudioOff(BUZZER1);
+            ButtonAcknowledge(BUTTON0);
+          } else {
+            songIndex++;
+          }
         }
+
+        // if (songIndex == (u8)(sizeof(songs[ledIndex]) / sizeof(u16))) {
+        //   songIndex = 0;
+        //   songPlaying = FALSE;
+        //   PWMAudioOff(BUZZER1);
+        //   ButtonAcknowledge(BUTTON0);
+        // } else {
+        //   songIndex++;
+        // }
       } else {
         waitTime--;
       }
