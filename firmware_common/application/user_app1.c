@@ -38,6 +38,8 @@ PROTECTED FUNCTIONS
 **********************************************************************************************************************/
 
 #include "configuration.h"
+#include "lcd_NHD-C12864LZ.h"
+#include "lcd_bitmaps.h"
 
 /***********************************************************************************************************************
 Global variable definitions with scope across entire project.
@@ -61,6 +63,35 @@ Variable names shall start with "UserApp1_<type>" and be declared as static.
 ***********************************************************************************************************************/
 static fnCode_type UserApp1_pfStateMachine;               /*!< @brief The state machine function pointer */
 //static u32 UserApp1_u32Timeout;                           /*!< @brief Timeout counter used across states */
+
+static u8 UserApp1_au8Name[] = "Saksham";
+const u8 aau8CustomLogo[U8_LCD_IMAGE_ROW_SIZE_25PX][U8_LCD_IMAGE_COL_BYTES_25PX] = {
+{0x00, 0x00, 0x00, 0x00},
+{0x00, 0x00, 0x00, 0x00},
+{0x00, 0x00, 0x00, 0x00},
+{0xF0, 0xFF, 0x1F, 0x00},
+{0xFC, 0xFF, 0x7F, 0x00},
+{0xFE, 0xFF, 0xFF, 0x00},
+{0x0F, 0x00, 0xE0, 0x00},
+{0x07, 0xC0, 0xC0, 0x01},
+{0x07, 0xC0, 0xC0, 0x01},
+{0x07, 0xC0, 0xC0, 0x01},
+{0x1F, 0xC0, 0xC0, 0x01},
+{0xFE, 0xC1, 0xE0, 0x00},
+{0xFC, 0xC7, 0xFF, 0x00},
+{0xF0, 0xCF, 0x7F, 0x00},
+{0x00, 0xCF, 0x00, 0x00},
+{0x00, 0xCE, 0x00, 0x00},
+{0x00, 0xCE, 0x00, 0x00},
+{0x00, 0xCE, 0x00, 0x00},
+{0x03, 0xCF, 0x00, 0x00},
+{0xFF, 0xCF, 0x00, 0x00},
+{0xFF, 0xC7, 0x00, 0x00},
+{0xF8, 0xC0, 0x00, 0x00},
+{0x00, 0x00, 0x00, 0x00},
+{0x00, 0x00, 0x00, 0x00},
+{0x00, 0x00, 0x00, 0x00}
+};
 
 
 /**********************************************************************************************************************
@@ -92,6 +123,21 @@ Promises:
 */
 void UserApp1Initialize(void)
 {
+
+  LcdClearScreen();
+  // PixelAddressType sTargetPixel = {32, 64};
+  // LcdSetPixel(&sTargetPixel);
+
+  // PixelAddressType sTestStringLocation = {U16_LCD_TOP_MOST_ROW, U16_LCD_LEFT_MOST_COLUMN};
+  // LcdLoadString(UserApp1_au8Name, LCD_FONT_SMALL, &sTestStringLocation);
+
+  PixelBlockType sTestImage;
+  sTestImage.u16RowStart = 0;
+  sTestImage.u16ColumnStart = 0;
+  sTestImage.u16RowSize = 25;
+  sTestImage.u16ColumnSize = 25;
+  LcdLoadBitmap(&aau8CustomLogo[0][0], &sTestImage);
+
   /* If good initialization, set state to Idle */
   if( 1 )
   {
@@ -140,6 +186,32 @@ State Machine Function Definitions
 /* What does this state do? */
 static void UserApp1SM_Idle(void)
 {
+  static u8 u8CurrentRow = 0;
+
+  if (WasButtonPressed(BUTTON0)) {
+    ButtonAcknowledge(BUTTON0);
+    if (u8CurrentRow + U8_LCD_SMALL_FONT_ROWS < U16_LCD_ROWS - U8_LCD_SMALL_FONT_ROWS) {
+      u8CurrentRow += U8_LCD_SMALL_FONT_ROWS;
+
+      LcdClearScreen();
+      PixelAddressType sTestStringLocation = {u8CurrentRow, U16_LCD_LEFT_MOST_COLUMN};
+      LcdLoadString(UserApp1_au8Name, LCD_FONT_SMALL, &sTestStringLocation);
+    }
+  }
+
+  if (WasButtonPressed(BUTTON1)) {
+    ButtonAcknowledge(BUTTON1);
+    if (u8CurrentRow > 0) {
+      u8CurrentRow -= U8_LCD_SMALL_FONT_ROWS;
+
+      LcdClearScreen();
+      PixelAddressType sTestStringLocation = {u8CurrentRow, U16_LCD_LEFT_MOST_COLUMN};
+      LcdLoadString(UserApp1_au8Name, LCD_FONT_SMALL, &sTestStringLocation);
+    }
+  }
+  // PixelAddressType sTestStringLocation = {U8_LCD_SMALL_FONT_LINE4, U16_LCD_LEFT_MOST_COLUMN};
+  // u8 au8TestString[] = "Saksham";
+  // LcdLoadString(au8TestString, LCD_FONT_SMALL, &sTestStringLocation);
      
 } /* end UserApp1SM_Idle() */
      
