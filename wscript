@@ -243,6 +243,7 @@ def build(ctx):
     dot_matrix_folders = [
         "firmware_dotmatrix/bsp/",
         "firmware_dotmatrix/drivers",
+        "firmware_dotmatrix/application/",
         "firmware_dotmatrix/libraries/captouch",
         "firmware_dotmatrix/libraries/captouch/include",
     ]
@@ -380,7 +381,7 @@ def get_jlink_srch_path(exe_name: str):
         install_roots = [
             "C:\\Program Files\\SEGGER\\",
             "C:\\Program Files (x86)\\SEGGER\\",
-            "D:\\SEGGER\\",
+            "C:\\Program Files\\SEGGER\\JLink_V798i",
         ]
 
     elif Utils.unversioned_sys_platform() == "darwin":
@@ -444,10 +445,7 @@ def get_gcc_srch_path_win32():
     import winreg
 
     REGISTRY_PATHS = [(winreg.HKEY_LOCAL_MACHINE, "SOFTWARE\\WOW6432Node\\ARM")]
-    INSTALL_PATHS = [
-        "C:\\Program Files (x86)\\Arm GNU Toolchain arm-none-eabi",
-        "D:\\Arm_GNU_Toolchain\\13_3_rel1\\arm-none-eabi",
-    ]
+    INSTALL_PATHS = ["C:\Program Files (x86)\Arm GNU Toolchain arm-none-eabi\\13.3 rel1\\arm-none-eabi"]
 
     gcc_vers = defaultdict(set)  # Map from version numbers to discovered paths.
 
@@ -455,10 +453,7 @@ def get_gcc_srch_path_win32():
         pth = pathlib.Path(pth) / "bin"
         ver = check_gcc_ver(pth, ext="exe")
         if ver:
-            # Some older/alternate toolchains use the year as the current version number
-            # (eg. "2021"). For EiE we will just ignore them.
-            if ver[0] < 1000:
-                gcc_vers[ver].add(str(pth))
+            gcc_vers[ver].add(str(pth))
 
     for root, subk in REGISTRY_PATHS:
         try:
@@ -479,9 +474,6 @@ def get_gcc_srch_path_win32():
 
     for install_pth in INSTALL_PATHS:
         install_pth = pathlib.Path(install_pth)
-        if not install_pth.exists():
-            continue
-
         for pth in install_pth.iterdir():
             check(pth)
 
